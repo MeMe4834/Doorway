@@ -1,0 +1,5 @@
+INDEX VERSION 1.134+/Users/smile/Desktop/2023-2/융프2/kiosk_new/.metadata/.plugins/org.eclipse.jdt.core
+1704799641.index
+1865797976.index
+2990325345.index
+502931402.index

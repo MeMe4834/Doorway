@@ -1,0 +1,574 @@
+package view;
+
+import javax.swing.*;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
+import javax.swing.event.TableModelEvent;
+import javax.swing.event.TableModelListener;
+import javax.swing.table.DefaultTableModel;
+import javax.swing.table.JTableHeader;
+
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
+// 주문페이지
+public class OrderPage extends JFrame {
+    private JPanel sandwichPanel; // 샌드위치 주문 패널
+    private JPanel dessertPanel; // 디저트 주문 패널
+    private JPanel beveragePanel; // 음료 주문 패널
+    private JPanel learnPanel; // 배운거 
+    private ImageIcon updateIcon; // 메뉴 이미지 아이콘
+    //private static final String[] COL_NAMES = { "Menu", "수량", "Price" }; // 장바구니 목록
+    private JPanel cartPanel; // 장바구니 패널
+    private int total = 0; // 가격 
+    private JTextField txtTotal;
+    private List<String> orderList; // 주문 목록 리스트 
+    private JPanel label;
+    
+    public OrderPage() {
+        setTitle("Order Page");
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setSize(435, 850); // 초기 프레임 크기
+        setLocationRelativeTo(null);
+
+        JPanel mainPanel = new JPanel(); // 주문페이지 패널
+        
+        // 이미지를 상단에 추가하기 위한 header패널
+        JPanel headerPanel = new JPanel();
+        headerPanel.setLayout(new BoxLayout(headerPanel, BoxLayout.Y_AXIS));
+        
+        ImageIcon headerImageIcon = new ImageIcon("images/order.png");
+        JLabel headerLabel = new JLabel(headerImageIcon);
+        headerPanel.add(headerLabel);
+        
+        // 메뉴 버튼 패널
+        JPanel buttonPanel = new JPanel(new FlowLayout());
+
+        JButton sandwichBtn = new JButton("Sandwich");
+        JButton dessertBtn = new JButton("Dessert");
+        JButton beverageBtn = new JButton("Beverage");
+        JButton learnBtn = new JButton("Learn");
+        
+        buttonPanel.add(sandwichBtn);
+        buttonPanel.add(dessertBtn);
+        buttonPanel.add(beverageBtn);
+        buttonPanel.add(learnBtn);
+        
+        headerPanel.add(buttonPanel); // 이미지와 버튼 패널을 합쳐 상단 패널에 추가
+        mainPanel.add(headerPanel, BorderLayout.NORTH);
+
+        sandwichPanel = createMenuPanel("Sandwich Menu"); // 샌드위치 메뉴 생성
+        sandwichPanel.setPreferredSize(new Dimension(400, 400));
+        dessertPanel = createDessertPanel("Dessert Menu"); // 디저트 메뉴 생성
+        dessertPanel.setPreferredSize(new Dimension(400, 400));
+        beveragePanel = createBeveragePanel("Beverage Menu"); // 음료 메뉴 생성
+        beveragePanel.setPreferredSize(new Dimension(400, 400));
+        learnPanel = createLearnPanel("Learn"); 
+        learnPanel.setPreferredSize(new Dimension(400, 400));
+        
+        sandwichPanel.setVisible(true); // 주문페이지 초기 화면은 샌드위치 메뉴가 뜨도록
+        dessertPanel.setVisible(false);
+        beveragePanel.setVisible(false);
+        learnPanel.setVisible(false);
+        
+        // 각각의 메뉴 버튼을 누르면 해당 메뉴 패널을 보여줌
+        sandwichBtn.addActionListener(e -> showMenuPanel1(sandwichPanel));
+        dessertBtn.addActionListener(e -> showMenuPanel2(dessertPanel)); 
+        beverageBtn.addActionListener(e -> showMenuPanel3(beveragePanel));
+        learnBtn.addActionListener(e -> showMenuPanel4(learnPanel));
+        
+        mainPanel.add(sandwichPanel, BorderLayout.CENTER);
+        mainPanel.add(dessertPanel, BorderLayout.CENTER);
+        mainPanel.add(beveragePanel, BorderLayout.CENTER);
+        mainPanel.add(learnPanel, BorderLayout.CENTER);
+        
+        // 장바구니 라벨 패널
+        label = new JPanel();
+        label.setLayout(new GridLayout(1,4));
+        label.setPreferredSize(new Dimension(400, 20));
+        label.setBackground(new Color(235,210,210));
+
+        JLabel menuLabel = new JLabel("Menu");
+        JLabel space = new JLabel();    // 위치 조정하기 위해 만든 빈 label
+        JLabel cntLabel = new JLabel("수량");
+        JLabel costLabel = new JLabel("Price");
+
+        menuLabel.setHorizontalAlignment(JLabel.CENTER);
+        cntLabel.setHorizontalAlignment(JLabel.CENTER);
+        costLabel.setHorizontalAlignment(JLabel.CENTER);
+
+        label.add(menuLabel);
+        label.add(space);
+        label.add(cntLabel);
+        label.add(costLabel);
+        mainPanel.add(label);
+        
+        // 장바구니 목록 패널
+        cartPanel = new JPanel();
+        cartPanel.setPreferredSize(new Dimension(400, 130));
+        
+        JScrollPane scrollPane = new JScrollPane(cartPanel); // 주문 목록이 쌓일 경우를 대비
+        scrollPane.setPreferredSize(new Dimension(400, 130));
+		mainPanel.add(scrollPane);
+		
+		orderList = new ArrayList();
+		
+		// 주문금액 패널 생성
+		JPanel tP = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+		tP.setBackground(new Color(157, 209, 178));
+		tP.setPreferredSize(new Dimension(450, 30));
+		
+        JLabel totalPrice = new JLabel("TOTAL PRICE:");
+		tP.add(totalPrice);
+
+		txtTotal = new JTextField();
+		txtTotal.setText("0");
+		txtTotal.setEditable(false);
+		txtTotal.setColumns(4);
+		tP.add(txtTotal);
+		
+		mainPanel.add(tP);
+		
+		// 주문 버튼 패널
+		JPanel btnPanel = new JPanel();
+		btnPanel.setBackground(new Color(217, 217, 217));
+		btnPanel.setPreferredSize(new Dimension(450, 30));
+		
+        JButton orderBtn = new JButton("ORDER"); // 메뉴 주문
+        JButton deleteBtn = new JButton("DELETE"); // 메뉴 삭제 
+        JButton back = new JButton("BACK"); // 메인 페이지로 가기
+        
+        // 주문하기 버튼 클릭 시
+        orderBtn.addActionListener(e -> {
+            int response = JOptionPane.showConfirmDialog(
+                    null, "총 주문 금액은 " + txtTotal.getText() + "입니다. 결제하시겠습니까?", "결제 확인", JOptionPane.YES_NO_OPTION);
+
+            if (response == JOptionPane.YES_OPTION) {
+            	// 영수증에 주문 내역 추가
+                Receipt receipt = new Receipt(); // 영수증 객체 생성
+
+                Component[] components = cartPanel.getComponents();
+                for (Component component : components) {
+                    if (component instanceof JPanel) {
+                        JPanel panel = (JPanel) component;
+
+                        JLabel menu = (JLabel) panel.getComponent(1);
+                        JLabel cnt = (JLabel) panel.getComponent(4);
+                        JLabel cost = (JLabel) panel.getComponent(6);
+
+                        if (menu != null && cnt != null && cost != null) {
+                        	// 영수증에 주문 내역 추가
+                            receipt.addToReceipt(menu.getText(), Integer.parseInt(cnt.getText()), Integer.parseInt(cost.getText()));
+                        }
+                    }
+                }
+                cartPanel.removeAll(); // 주문완료 후 장바구니 목록 비우기
+                cartPanel.revalidate();
+                cartPanel.repaint();
+            }
+        });
+
+        // 삭제 버튼 클릭 시
+		deleteBtn.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				deleteFromBasket(); // 장바구니 목록에서 메뉴 삭제
+			}
+		});
+		// 뒤로가기 버튼 클릭 시
+        back.addActionListener(new ActionListener() {
+        	public void actionPerformed(ActionEvent e) {
+                // 메인페이지로 이동
+                MainPage mainPage = new MainPage();
+                mainPage.setVisible(true);
+                setVisible(false);
+            }
+        });
+        
+        btnPanel.add(back, FlowLayout.LEFT);
+		btnPanel.add(deleteBtn,new FlowLayout(FlowLayout.RIGHT));
+		btnPanel.add(orderBtn,new FlowLayout(FlowLayout.RIGHT));
+		
+		mainPanel.add(btnPanel);
+		
+        add(mainPanel);
+    } // order page 프레임
+    
+    
+    
+// Function
+    // 샌드위치 패널 생성 함수
+    private JPanel createMenuPanel(String title) {
+        JPanel sandwichPanel = new JPanel();
+        sandwichPanel.setBorder(BorderFactory.createTitledBorder(title)); // 패널 테두리 생성
+        
+        // 메뉴 이름과 가격 배열
+        String[] menuNames = {"BLT", "avocado", "club", "egg mayo", "pork", "shrimp"};
+        int[] menuPrices = {5000, 6000, 5500, 4800, 5200, 5700};
+
+        for (int i = 0; i < menuNames.length; i++) {
+        	final int index = i;
+        	setImageSize("images/"+menuNames[i]+".jpg", 110, 110);
+    		JButton menubtn = new JButton(updateIcon); // 이미지로 설정된 버튼 생성
+    		menubtn.setBackground(Color.WHITE);
+    		// 메뉴 클릭 시
+    		menubtn.addActionListener(new ActionListener() {
+    			@Override
+    			public void actionPerformed(ActionEvent e) {
+    				int res = JOptionPane.showConfirmDialog(
+    	                    null, "장바구니에 선택한 메뉴를 담으시겠습니까?", "주문 확인", JOptionPane.YES_NO_OPTION);
+    				if (res == JOptionPane.YES_OPTION) {
+    					// 장바구니 목록에 추가
+    				addToBasket(menuNames[index], 1, menuPrices[index]);}
+    			}
+    		});
+    		sandwichPanel.add(menubtn);
+    		// 메뉴 이름과 가격 정보 사진 옆에 띄우기
+    		JPanel infoPanel = new JPanel();
+            infoPanel.setLayout(new BoxLayout(infoPanel, BoxLayout.Y_AXIS)); // 세로 방향으로 컴포넌트를 배치하기 위해 Y_AXIS 사용
+
+            JLabel Name = new JLabel(menuNames[i]);
+            JLabel Price = new JLabel(Integer.toString(menuPrices[i]));
+            Name.setOpaque(true);
+            Price.setOpaque(true);
+            Name.setHorizontalAlignment(SwingConstants.CENTER);
+            Price.setHorizontalAlignment(SwingConstants.CENTER);
+
+            infoPanel.add(Name);
+            infoPanel.add(Box.createVerticalGlue()); 
+            infoPanel.add(Price);
+            infoPanel.add(Box.createVerticalGlue()); 
+
+            sandwichPanel.add(infoPanel);
+        }
+
+        return sandwichPanel;
+    }
+    // 디저트 패널 생성 함수
+    private JPanel createDessertPanel(String title) {
+        JPanel dessertPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        dessertPanel.setBorder(BorderFactory.createTitledBorder(title));
+       
+        String[] menuNames = {"berry", "veggie salad", "soup", "wedge"};
+        int[] menuPrices = {5000, 6000, 5500, 4800};
+
+        for (int i = 0; i < menuNames.length; i++) {
+        	final int index =i;
+        	setImageSize("images/"+menuNames[i]+".jpg", 110, 110);
+    		JButton menubtn = new JButton(updateIcon);
+    		menubtn.setBackground(Color.WHITE);
+    		menubtn.addActionListener(new ActionListener() {
+    			@Override
+    			public void actionPerformed(ActionEvent e) {
+    				int res = JOptionPane.showConfirmDialog(
+    	                    null, "장바구니에 선택한 메뉴를 담으시겠습니까?", "주문 확인", JOptionPane.YES_NO_OPTION);
+    				if (res == JOptionPane.YES_OPTION) {
+    				addToBasket(menuNames[index], 1, menuPrices[index]);}
+    			}
+    		});
+    		dessertPanel.add(menubtn);
+    		
+    		JPanel infoPanel = new JPanel();
+            infoPanel.setLayout(new BoxLayout(infoPanel, BoxLayout.Y_AXIS)); // 세로 방향으로 컴포넌트를 배치하기 위해 Y_AXIS 사용
+
+            JLabel Name = new JLabel(menuNames[i]);
+            JLabel Price = new JLabel(Integer.toString(menuPrices[i]));
+            Name.setOpaque(true);
+            Price.setOpaque(true);
+            Name.setHorizontalAlignment(SwingConstants.CENTER);
+            Price.setHorizontalAlignment(SwingConstants.CENTER);
+
+            
+            infoPanel.add(Name);
+            infoPanel.add(Box.createVerticalGlue()); 
+            infoPanel.add(Price);
+            infoPanel.add(Box.createVerticalGlue()); 
+
+            dessertPanel.add(infoPanel);
+        }
+
+        return dessertPanel;
+    }
+    // 음료 패널 생성 함수
+    private JPanel createBeveragePanel(String title) {
+        JPanel beveragePanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        beveragePanel.setBorder(BorderFactory.createTitledBorder(title));
+
+        String[] menuNames = {"milk", "coffee", "drink"};
+        int[] menuPrices = {2000, 3000, 3500};
+
+        for (int i = 0; i < menuNames.length; i++) {
+            final int index = i;
+            setImageSize("images/" + menuNames[i] + ".jpg", 110, 110);
+            JButton menubtn = new JButton(updateIcon);
+            menubtn.setBackground(Color.WHITE);
+            menubtn.addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+    				int res = JOptionPane.showConfirmDialog(
+    	                    null, "장바구니에 선택한 메뉴를 담으시겠습니까?", "주문 확인", JOptionPane.YES_NO_OPTION);
+    				if (res == JOptionPane.YES_OPTION) {
+    				addToBasket(menuNames[index], 1, menuPrices[index]);}
+    			}
+            });
+            beveragePanel.add(menubtn);
+
+            JPanel infoPanel = new JPanel();
+            infoPanel.setLayout(new BoxLayout(infoPanel, BoxLayout.Y_AXIS)); // 세로 방향으로 컴포넌트를 배치하기 위해 Y_AXIS 사용
+
+            JLabel Name = new JLabel(menuNames[i]);
+            JLabel Price = new JLabel(Integer.toString(menuPrices[i]));
+            Name.setOpaque(true);
+            Price.setOpaque(true);
+            Name.setHorizontalAlignment(SwingConstants.CENTER);
+            Price.setHorizontalAlignment(SwingConstants.CENTER);
+
+            infoPanel.add(Box.createVerticalGlue()); // menubtn과 Name을 위로 밀기 위한 공간
+            infoPanel.add(Name);
+            infoPanel.add(Box.createVerticalGlue()); // Name과 Price를 가운데로 정렬하기 위한 공간
+            infoPanel.add(Price);
+            infoPanel.add(Box.createVerticalGlue()); // Price를 아래로 밀기 위한 공간
+
+            beveragePanel.add(infoPanel);
+        }
+
+        return beveragePanel;
+    }
+    // 4번째 패널 생성 함수
+    private JPanel createLearnPanel(String title) {
+        learnPanel = new JPanel();
+        learnPanel.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(),title));
+        JLabel colorLabel = new JLabel("Color Change");
+        JSlider[] sliders = new JSlider[3];
+        JPanel sliderPanel = new JPanel();
+        
+        sliderPanel.setLayout(new BoxLayout(sliderPanel, BoxLayout.Y_AXIS)); // 슬라이더 세로 배치
+        
+        for (int i = 0; i < sliders.length; i++) {
+            sliders[i] = new JSlider(JSlider.HORIZONTAL, 0, 255, 128);
+            sliders[i].setPaintLabels(true);
+            sliders[i].setPaintTrack(true);
+            sliders[i].setMajorTickSpacing(50);
+            sliders[i].setMinorTickSpacing(10);
+            sliders[i].addChangeListener(new MyChangeListener(sliders, colorLabel));
+            sliders[i].setPreferredSize(new Dimension(300, 50));
+            sliderPanel.add(sliders[i]);
+        }
+        sliders[0].setForeground(Color.RED);
+        sliders[1].setForeground(Color.GREEN);
+        sliders[2].setForeground(Color.BLUE);
+
+        int r = sliders[0].getValue();
+        int g = sliders[1].getValue();
+        int b = sliders[2].getValue();
+
+        colorLabel.setOpaque(true);
+        colorLabel.setBackground(new Color(r, g, b));
+        colorLabel.setPreferredSize(new Dimension(200, 30));
+        sliderPanel.add(Box.createVerticalGlue()); 
+        sliderPanel.add(colorLabel,BorderLayout.NORTH);
+        
+        learnPanel.add(sliderPanel);
+        
+        return learnPanel;
+    }
+    class MyChangeListener implements ChangeListener {
+        JSlider[] sliders;
+        JLabel label;
+
+        MyChangeListener(JSlider[] sliders, JLabel label) {
+            this.sliders = sliders;
+            this.label = label;
+        }
+
+        @Override
+        public void stateChanged(ChangeEvent e) {
+            int r = sliders[0].getValue();
+            int g = sliders[1].getValue();
+            int b = sliders[2].getValue();
+
+            label.setBackground(new Color(r, g, b));
+        }
+    }
+    
+    // 장바구니 목록에서 메뉴 삭제
+    private void deleteFromBasket() {
+        Component[] components = cartPanel.getComponents(); // 장바구니 패널에 있는 모든 컴포넌트 가져오기
+        
+        // 각 패널 내의 컴포넌트들을 확인하여, 해당 패널에 포함된 JCheckBox와 JLabel 찾기
+        for (Component component : components) {
+            if (component instanceof JPanel) {
+                JPanel panel = (JPanel) component;
+                Component[] panelComponents = panel.getComponents();
+                JCheckBox cb = null;
+                JLabel costLabel = null;
+                for (Component panelComponent : panelComponents) {
+                    if (panelComponent instanceof JCheckBox) {
+                        cb = (JCheckBox) panelComponent;
+                    } else if (panelComponent instanceof JLabel) {
+                        costLabel = (JLabel) panelComponent;
+                    }
+                }
+                // 체크박스가 선택된 경우
+                if (cb != null && cb.isSelected()) {
+                    int cost = Integer.parseInt(costLabel.getText());
+                    total -= cost; // 선택된 항목의 가격을 총 가격에서 차감
+                    cartPanel.remove(panel); // 선택된 패널을 장바구니에서 제거
+                }
+            }
+        }
+
+        txtTotal.setText(Integer.toString(total)); // 총 가격을 업데이트한 값으로 설정
+        cartPanel.revalidate();
+        cartPanel.repaint();
+    }
+
+    
+
+    // showMenuPanel
+    private void showMenuPanel1(JPanel panelToShow) {
+        panelToShow.setVisible(true); // 샌드위치 패널이 보이게
+        dessertPanel.setVisible(false);
+        beveragePanel.setVisible(false);
+        learnPanel.setVisible(false);
+        cartPanel.setVisible(true);
+    }
+    private void showMenuPanel2(JPanel panelToShow) {
+    	panelToShow.setVisible(true); // 디저트 패널이 보이게
+        sandwichPanel.setVisible(false);
+        beveragePanel.setVisible(false);
+        learnPanel.setVisible(false);
+        cartPanel.setVisible(true);
+    }
+    private void showMenuPanel3(JPanel panelToShow) {
+    	panelToShow.setVisible(true); // 음료 패널이 보이게
+        sandwichPanel.setVisible(false);
+        dessertPanel.setVisible(false);
+        learnPanel.setVisible(false);
+        cartPanel.setVisible(true);
+    }
+    private void showMenuPanel4(JPanel panelToShow) {
+    	panelToShow.setVisible(true);
+    	sandwichPanel.setVisible(false);
+        dessertPanel.setVisible(false);
+        beveragePanel.setVisible(false);
+        cartPanel.setVisible(true);
+    }
+    
+    // 이미지 크기 조절 함수
+    private void setImageSize(String image, int width, int height) {
+		ImageIcon icon = new ImageIcon(image);
+		Image img = icon.getImage(); // ImageIcon을 Image로 변환
+		Image updateImg = img.getScaledInstance(width, height, Image.SCALE_SMOOTH); // 이미지 크기 설정. 원래 비율은 맞춰야 함
+		updateIcon = new ImageIcon(updateImg); // 크기 조절된 Image로 ImageIcon을 생성
+	}
+    
+    // 장바구니 목록 추가 함수
+    private void addToBasket(String menu, int quantity, int price) {
+        boolean menuExists = false;
+        Component[] components = cartPanel.getComponents();
+        
+        // 장바구니에 이미 있는 메뉴인지 확인
+        for (Component component : components) {
+            if (component instanceof JPanel) {
+                JPanel panel = (JPanel) component;
+                JLabel menuLabel = (JLabel) panel.getComponent(1); // Index 1: 메뉴 이름
+                // 이미 있는 메뉴인 경우
+                if (menuLabel.getText().equals(menu)) {
+                    JLabel cntLabel = (JLabel) panel.getComponent(3); // Index 3: 수량
+                    JLabel costLabel = (JLabel) panel.getComponent(5); // Index 5: 가격
+
+                    int prevQuantity = Integer.parseInt(cntLabel.getText());
+                    int newQuantity = prevQuantity + quantity;
+                    int newCost = newQuantity * price;
+
+                    cntLabel.setText(Integer.toString(newQuantity));
+                    costLabel.setText(Integer.toString(newCost));
+                    
+                    total += price; // 가격 추가
+                    txtTotal.setText(Integer.toString(total)); 
+                    
+                    menuExists = true;
+                    break;
+                }
+            }
+        }
+
+        if (!menuExists) {
+            JPanel labelB = new JPanel();
+            labelB.setLayout(new GridLayout(1, 6)); // 컬럼 수에 체크박스를 추가하기 위해 6으로 변경
+            labelB.setPreferredSize(new Dimension(400, 18));
+
+            JCheckBox checkBox = new JCheckBox(); // 체크박스 추가
+            JLabel menuLabel = new JLabel(menu);
+            JLabel space = new JLabel();
+            JLabel cntLabel = new JLabel(Integer.toString(quantity));
+            JLabel costLabel = new JLabel(Integer.toString(quantity * price));
+            // 수량추가버튼
+            JButton plusButton = new JButton("+");
+            plusButton.setPreferredSize(new Dimension(5, 5));
+            plusButton.addActionListener(e -> {
+                int newQuantity = Integer.parseInt(cntLabel.getText()) + 1;
+                int newCost = newQuantity * price;
+                cntLabel.setText(Integer.toString(newQuantity));
+                costLabel.setText(Integer.toString(newCost));
+                
+                total += price;
+                txtTotal.setText(Integer.toString(total));
+            });
+            // 수량감소버튼
+            JButton minusButton = new JButton("-");
+            minusButton.setPreferredSize(new Dimension(5, 5)); 
+            minusButton.addActionListener(e -> {
+                int newQuantity = Integer.parseInt(cntLabel.getText()) - 1;
+                if (newQuantity >= 0) {
+                    int newCost = newQuantity * price;
+                    cntLabel.setText(Integer.toString(newQuantity));
+                    costLabel.setText(Integer.toString(newCost));
+                    
+                    total -= price;
+                    txtTotal.setText(Integer.toString(total)); 
+                    
+                    if (newQuantity == 0) {
+                        cartPanel.remove(labelB); // 수량이 0이면 해당 아이템을 장바구니에서 삭제
+                    }
+                }
+                cartPanel.revalidate();
+                cartPanel.repaint();
+            });
+
+            menuLabel.setHorizontalAlignment(JLabel.CENTER);
+            cntLabel.setHorizontalAlignment(JLabel.CENTER);
+            costLabel.setHorizontalAlignment(JLabel.CENTER);
+
+            labelB.add(checkBox); // 체크박스를 첫 번째 컴포넌트로 추가
+            labelB.add(menuLabel);
+            //labelB.add(space);
+            labelB.add(minusButton);
+            labelB.add(cntLabel);
+            labelB.add(plusButton);
+            labelB.add(costLabel);
+
+            cartPanel.add(labelB);
+        }
+        
+        total += price;
+        txtTotal.setText(Integer.toString(total));
+
+        cartPanel.revalidate();
+        cartPanel.repaint();
+    }
+
+    public static void main(String[] args) {
+        SwingUtilities.invokeLater(() -> {
+            OrderPage orderPage = new OrderPage();
+            orderPage.setVisible(true);
+        });
+    }
+}

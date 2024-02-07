@@ -1,0 +1,201 @@
+package view;
+
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.*;
+
+public class OrderPage extends JFrame {
+    private JPanel mainPanel;
+    private JPanel sandwichPanel;
+    private JPanel drinkPanel;
+    private JPanel sidePanel;
+    private JPanel orderSummaryPanel;
+
+    public OrderPage(JFrame parent) {
+        setTitle("주문 페이지");
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setSize(400, 600); // 주문 페이지의 크기 설정
+        setLayout(new BorderLayout());
+
+        sandwichPanel = createPanel("Sandwich", new Menu[]{
+                new Menu("Italian BMT", 5.99, "images/Italian BMT.jpg"),
+                new Menu("Chicken Teriyaki", 6.49, "images/Chicken Teriyaki.jpg"),
+                new Menu("Stake", 4.99, "images/stake.jpg"),
+                new Menu("Egg Mayo", 4.99, "images/egg mayo.jpg"),
+                new Menu("Club", 4.99, "images/club.png"),
+                new Menu("Avocado", 4.99, "images/avocado.jpg"),
+                new Menu("Cheese", 4.99, "images/avocado.jpg"),
+                new Menu("Barbeque", 4.99, "images/avocado.jpg")
+                
+        });
+
+        drinkPanel = createPanel("Drink", new Menu[]{
+                new Menu("Coke", 1.99, "drink.jpg"),
+                new Menu("Milk", 1.99, "images/milk.jpg"),
+                new Menu("Coffee", 1.99, "images/coffee.jpg")
+        });
+
+        sidePanel = createPanel("Side", new Menu[]{
+                new Menu("Cake", 2.49, "images/berry.jpg"),
+                new Menu("Potato", 2.99, "images/wedge.jpg"),
+                new Menu("Salad", 3.49, "images/veggie salad.jpg")
+        });
+
+        mainPanel = new JPanel(new BorderLayout());
+        orderSummaryPanel = new JPanel(new GridLayout(0, 4));
+
+        JButton sandwichButton = new JButton("Sandwich");
+        sandwichButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                mainPanel.removeAll();
+                mainPanel.add(sandwichPanel, BorderLayout.CENTER);
+                mainPanel.revalidate();
+                mainPanel.repaint();
+            }
+        });
+
+        JButton drinkButton = new JButton("Drink");
+        drinkButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                mainPanel.removeAll();
+                mainPanel.add(drinkPanel, BorderLayout.CENTER);
+                mainPanel.revalidate();
+                mainPanel.repaint();
+            }
+        });
+
+        JButton sideButton = new JButton("Side");
+        sideButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                mainPanel.removeAll();
+                mainPanel.add(sidePanel, BorderLayout.CENTER);
+                mainPanel.revalidate();
+                mainPanel.repaint();
+            }
+        });
+
+        JPanel buttonsPanel = new JPanel(new GridLayout(1, 3));
+        buttonsPanel.add(sandwichButton);
+        buttonsPanel.add(drinkButton);
+        buttonsPanel.add(sideButton);
+
+        add(buttonsPanel, BorderLayout.NORTH);
+        add(mainPanel, BorderLayout.CENTER);
+        add(orderSummaryPanel, BorderLayout.SOUTH);
+
+        setLocationRelativeTo(parent);
+        setVisible(true);
+    }
+
+    private JPanel createPanel(String title, Menu[] menus) {
+        JPanel panel = new JPanel(new GridLayout(0, 2));
+        panel.setBorder(BorderFactory.createTitledBorder(title));
+
+        for (Menu menu : menus) {
+            JPanel menuItemPanel = new JPanel(new BorderLayout());
+            menuItemPanel.setPreferredSize(new Dimension(150, 200));
+
+            ImageIcon image = new ImageIcon(menu.getImagePath());
+            JLabel imageLabel = new JLabel(image);
+            menuItemPanel.add(imageLabel, BorderLayout.CENTER);
+
+            JLabel nameLabel = new JLabel(menu.getName());
+            JLabel priceLabel = new JLabel("$" + menu.getPrice());
+            JPanel infoPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+            infoPanel.add(nameLabel);
+            infoPanel.add(priceLabel);
+            menuItemPanel.add(infoPanel, BorderLayout.SOUTH);
+
+            JButton confirmButton = new JButton("Order");
+            confirmButton.addActionListener(new ActionListener() {
+                public void actionPerformed(ActionEvent e) {
+                    addToOrderSummary(menu);
+                }
+            });
+            menuItemPanel.add(confirmButton, BorderLayout.CENTER);
+
+            panel.add(menuItemPanel);
+        }
+
+        return panel;
+    }
+
+    private void addToOrderSummary(Menu menu) {
+    	JLabel nameLabel = new JLabel(menu.getName());
+        JLabel priceLabel = new JLabel("$" + menu.getPrice());
+        JLabel quantityLabel = new JLabel("1");
+
+        JPanel menuItemPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        menuItemPanel.setPreferredSize(new Dimension(350, 30));
+        menuItemPanel.add(nameLabel);
+        menuItemPanel.add(quantityLabel);
+        menuItemPanel.add(priceLabel);
+
+        JButton removeButton = new JButton("-");
+        removeButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                int quantity = Integer.parseInt(quantityLabel.getText()) - 1;
+                if (quantity >= 0) {
+                    quantityLabel.setText(String.valueOf(quantity));
+                    updatePrice(priceLabel, menu.getPrice(), quantity);
+                }
+            }
+        });
+
+        JButton addButton = new JButton("+");
+        addButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                int quantity = Integer.parseInt(quantityLabel.getText()) + 1;
+                quantityLabel.setText(String.valueOf(quantity));
+                updatePrice(priceLabel, menu.getPrice(), quantity);
+            }
+        });
+
+        JPanel quantityPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
+        quantityPanel.add(removeButton);
+        quantityPanel.add(quantityLabel);
+        quantityPanel.add(addButton);
+        menuItemPanel.add(quantityPanel);
+
+        orderSummaryPanel.add(menuItemPanel);
+        orderSummaryPanel.revalidate();
+        orderSummaryPanel.repaint();
+    }
+
+    private void updatePrice(JLabel priceLabel, double price, int quantity) {
+        double total = price * quantity;
+        priceLabel.setText("$" + String.format("%.2f", total));
+    }
+
+    public static void main(String[] args) {
+        SwingUtilities.invokeLater(new Runnable() {
+            public void run() {
+                OrderPage orderPage = new OrderPage(null);
+            }
+        });
+    }
+
+    class Menu {
+        private String name;
+        private double price;
+        private String imagePath;
+
+        public Menu(String name, double price, String imagePath) {
+            this.name = name;
+            this.price = price;
+            this.imagePath = imagePath;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public double getPrice() {
+            return price;
+        }
+
+        public String getImagePath() {
+            return imagePath;
+        }
+    }
+}

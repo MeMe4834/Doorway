@@ -1,0 +1,81 @@
+package view;
+
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.*;
+import java.awt.image.BufferedImage;
+// 메인페이지 
+public class MainPage extends JFrame {
+    private JLabel backgroundLabel;
+
+    public MainPage() {
+        setTitle("Doorway 키오스크");
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setSize(400, 700); // 프레임 크기 설정
+
+        // 배경 이미지 로드
+        ImageIcon backgroundImg = new ImageIcon("images/Frame.png"); // 메인페이지 배
+
+        // 배경 이미지 설정
+        backgroundLabel = new JLabel();
+        setContentPane(backgroundLabel);
+        setBackgroundImage(backgroundImg);
+
+        // 프레임 중앙에 배치
+        setLocationRelativeTo(null);
+
+        setLayout(new BorderLayout());
+
+        // '주문하기' 버튼 패널 설정
+        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
+        buttonPanel.setOpaque(false); // 투명 배경으로 설정
+        // '주문하기' 버튼 생성
+        JButton orderButton = new JButton("Click to Start");
+        orderButton.setBackground(new Color(146,184,66));
+        orderButton.setOpaque(true);
+        orderButton.setForeground(new Color(146,184,66));
+        orderButton.setPreferredSize(new Dimension(200, 50));
+        
+        buttonPanel.add(orderButton);
+        buttonPanel.setBackground(new Color(146,184,66));
+        buttonPanel.add(Box.createVerticalStrut(400)); // 하단 여백 추가
+
+        add(buttonPanel, BorderLayout.SOUTH);
+        
+        // 버튼 클릭 시 OrderPage로 이동
+        orderButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                OrderPage orderPage = new OrderPage();
+                orderPage.setVisible(true);
+                setVisible(false);
+            }
+        });
+
+        // ComponentListener를 사용하여 프레임 크기 변경 시 이미지 크기도 조절
+//        addComponentListener(new ComponentAdapter() {
+//            @Override
+//            public void componentResized(ComponentEvent e) {
+//                setBackgroundImage(backgroundImg);
+//            }
+//        });
+//    }
+
+    // 이미지를 프레임 크기에 맞게 조정하는 메서드
+    private void setBackgroundImage(ImageIcon imageIcon) {
+        Image image = imageIcon.getImage();
+        Image scaledImage = image.getScaledInstance(getWidth(), getHeight(), Image.SCALE_SMOOTH);
+        ImageIcon scaledImageIcon = new ImageIcon(scaledImage);
+        backgroundLabel.setIcon(scaledImageIcon);
+    }
+
+    public static void main(String[] args) {
+        SwingUtilities.invokeLater(new Runnable() {
+            @Override
+            public void run() {
+                MainPage mainPage = new MainPage();
+                mainPage.setVisible(true);
+            }
+        });
+    }
+}
