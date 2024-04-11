@@ -12,7 +12,7 @@
 |<img width="429" alt="결제확인" src="https://github.com/MeMe4834/Doorway/assets/127177460/6a2b8fc6-4293-479b-a935-4de56422dd14" align='left'/>|<img width="482" alt="주문내역" src="https://github.com/MeMe4834/Doorway/assets/127177460/05aef7e6-311f-474c-acf5-58c173a1a61c"  align='right/'>|
 
 ### 실행화면
-<img src="https://github.com/MeMe4834/Doorway/assets/127177460/efed72c9-4d0f-4028-9334-4aba7e2aa971" width="500" height="800">
+![GIFMaker_me](https://github.com/MeMe4834/Doorway/assets/127177460/efed72c9-4d0f-4028-9334-4aba7e2aa971)
 
 ### 기능
 ---
