@@ -2,11 +2,13 @@
 ### 설명
 ---
 샌드위치 가게 "Doorway" 키오스크 UI 개발
+
 ### 화면구성
 ---
+|:-------------------------------------:|:-------------------------------------:|
 |[메인페이지]|[주문페이지]|
 |<img width="512" alt="메인페이지" src="https://github.com/MeMe4834/Doorway/assets/127177460/ec5b9cf7-7cf6-4407-a699-f34296e3d65f" align='left'/>|<img width="547" alt="주문페이지" src="https://github.com/MeMe4834/Doorway/assets/127177460/a67dcb27-d150-437e-b71d-00af139e713a" align='right/'>|
-|-------------------------------------|--------------------------------------|
+|:-------------------------------------:|:--------------------------------------:|
 |[결제페이지]|[주문내역]|
 |<img width="429" alt="결제확인" src="https://github.com/MeMe4834/Doorway/assets/127177460/6a2b8fc6-4293-479b-a935-4de56422dd14" align='left'/>|<img width="482" alt="주문내역" src="https://github.com/MeMe4834/Doorway/assets/127177460/05aef7e6-311f-474c-acf5-58c173a1a61c"  align='right/'>|
 
