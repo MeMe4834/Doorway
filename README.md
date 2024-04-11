@@ -13,7 +13,7 @@
 
 ### 실행화면
 ---
-<img src="https://github.com/MeMe4834/Doorway/assets/127177460/5c84af57-89be-4655-abbf-fa5f6cfa7dcd" width="500" height="800">
+<img src="https://github.com/MeMe4834/Doorway/assets/127177460/5c84af57-89be-4655-abbf-fa5f6cfa7dcd" width="300" height="600">
 
 ### 기능
 ---
