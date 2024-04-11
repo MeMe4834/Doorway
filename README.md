@@ -1,5 +1,5 @@
 # Doorway_java-kiosk project
-#### 2023-2 융합프로그래밍2
+###### 2023-2 융합프로그래밍2
 ### 설명
 ---
 샌드위치 가게 **<span style="color:#008000;">Doorway</span>** 키오스크 UI 개발
